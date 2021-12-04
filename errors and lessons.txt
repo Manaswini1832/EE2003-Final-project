@@ -1,0 +1,6 @@
+1) Was looking into testbench.v and make test part but realized that we should change the make test_mod part
+2) Error : seq_mult instantiation requires an instance. Solution : instead of seq_mult(//inputs and outputs) replaced it with an instance of seq_mult i.e. seq_mult seq_mult(//inputs and outputs)
+-- After 2) and b are being written to the correct memory locations. Only ready signal is to be correctly sent back
+3) In the axi mem peripheral, '// Return the multiplier status - bit 0 should reflect the rdy signal' shows that the peripheral should return back some rdata that is always valid. That rdata will decide if the stuff received by the processor is the correct data(i.e. product) or not.
+So basically this rdata is the rdy signal
+4) So memory location 32'h3000_0000 takes care of rdy signal and we write to memory location 32'h3000_000c iff rdy = 1 and then 32'h3000_000c will send back the product
