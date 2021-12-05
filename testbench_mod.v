@@ -28,7 +28,8 @@ module testbench #(
 			$dumpfile("testbench.vcd");
 			$dumpvars(0, testbench);
 		end
-		repeat (1000000) @(posedge clk);
+		// Increase the timeout to allow large programs...
+		repeat (1000000000) @(posedge clk);
 		$display("TIMEOUT");
 		$finish;
 	end

@@ -6,7 +6,6 @@
 // means.
 
 #include "firmware.h"
-#include "njmem.c"
 
 #define STAT_ADDR 0x21000000
 void send_stat(bool status);
@@ -19,13 +18,10 @@ void send_stat(bool status)
 	}
 }
 
-//  #define MULT_BASE 0x30000000
-//  #define MULT_A (MULT_BASE + 4)
-//  #define MULT_B (MULT_BASE + 8)
-// #define MULT_RES (MULT_BASE + 12)
+ #define MULT_BASE 0x30000000
 #define MULT_A 0x40000000
 #define MULT_B 0x40400000
-#define MULT_RES 0x40800000
+#define MULT_RES 0x30000004
 #define START_SIG 0x01
 #define TIMEOUT 1000
 
@@ -88,19 +84,21 @@ void hello(void)
 {
 	int a = 6;
 	int b = 7;
-	print_str("Multiplying: ");
+	print_str("\nMultiplying matrices in software\n");
 	print_dec(a);
 	print_str(" with ");
 	print_dec(b);
 	print_str(" to get ");
 	print_dec(a*b);
-	print_str('Multiplying matrices in software');
+	print_str("\n");
 	//get software result here
 	print_str("\n\nAnd now in hardware: \n");
 	Mult_WriteA(a);
 	Mult_WriteB(b);
 	Mult_StartAndWait();
 	int x = Mult_GetResult();
+	print_str("\nPrinting the result\n");
+	print_dec(x);
 	//Send stat if x(from hardware) = AB(from hardware). Will have to implement
 	// a for loop to check if all elements are equal or not
 	send_stat(x == a*b);

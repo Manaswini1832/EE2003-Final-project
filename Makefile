@@ -85,8 +85,8 @@ testbench_synth.vvp: testbench.v synth.v
 	$(IVERILOG) -o $@ -DSYNTH_TEST $^
 	chmod -x $@
 
-testbench_verilator: testbench.v picorv32.v testbench.cc
-	$(VERILATOR) --cc --exe -Wno-lint -trace --top-module picorv32_wrapper testbench.v picorv32.v testbench.cc \
+testbench_verilator: testbench_mod.v picorv32.v axi4_mem_periph.v testbench.cc
+	$(VERILATOR) --cc --exe -Wno-lint -trace --top-module picorv32_wrapper testbench_mod.v picorv32.v axi4_mem_periph.v testbench.cc \
 			$(subst C,-DCOMPRESSED_ISA,$(COMPRESSED_ISA)) --Mdir testbench_verilator_dir
 	$(MAKE) -C testbench_verilator_dir -f Vpicorv32_wrapper.mk
 	cp testbench_verilator_dir/Vpicorv32_wrapper testbench_verilator
@@ -106,8 +106,9 @@ check.smt2: picorv32.v
 synth.v: picorv32.v scripts/yosys/synth_sim.ys
 	yosys -qv3 -l synth.log scripts/yosys/synth_sim.ys
 
+# Changing below to use 512k RAM
 firmware/firmware.hex: firmware/firmware.bin firmware/makehex.py
-	$(PYTHON) firmware/makehex.py $< 32768 > $@
+	$(PYTHON) firmware/makehex.py $< 524288 > $@
 
 firmware/firmware.bin: firmware/firmware.elf
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $< $@

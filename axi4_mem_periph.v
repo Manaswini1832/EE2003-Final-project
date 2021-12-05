@@ -38,10 +38,16 @@ module axi4_mem_periph #(
     
     // Instantiating the sequential multiplier module
     seq_mult seq_mult(p, rdy, clk, reset, a, b);
-    
-	reg [31:0]   memory [0:128*1024/4-1] /* verilator public */;
+	
+	//Memory register instantiations
+	reg [31:0]   memory [0:2048*1024/4-1] /* verilator public */;
+	// // Memory to store 2 matrices (1M) and working memory (2M)
+	// reg [31:0]   matrixmem [0:1024*1024/4-1] /* verilator public */;
+	reg [31:0]   wkmem  [0:2048*1024/4-1] /* verilator public */;
+	
 	reg verbose;
 	initial verbose = $test$plusargs("verbose") || VERBOSE;
+	// initial verbose = 1;
 
 	initial begin
 		mem_axi_awready = 0;
@@ -92,24 +98,25 @@ module axi4_mem_periph #(
 	task handle_axi_rvalid; begin
 		if (verbose)
 			$display("RD: ADDR=%08x DATA=%08x%s", latched_raddr, memory[latched_raddr >> 2], latched_rinsn ? " INSN" : "");
-		if (latched_raddr < 128*1024) begin
+		if (latched_raddr < 2048*1024) begin
 			mem_axi_rdata <= memory[latched_raddr >> 2];
 			mem_axi_rvalid <= 1;
 			latched_raddr_en = 0;
 		end else
-		if (latched_raddr == 32'h40C0_0000) begin
+		if (latched_raddr == 32'h3000_0000) begin
 			// Return the multiplier status - bit 0 should reflect the rdy signal
 			mem_axi_rdata <= rdy;
 			mem_axi_rvalid <= 1;
 			latched_raddr_en = 0; // Why?
 		end else
-		// if (latched_raddr == 32'h3000_000c) begin // This was there in seqmult assignment
-		if (latched_raddr == 32'h4080_0000) begin
-			// Send back whatever you want?  Output of seqmult?
+		if (latched_raddr == 32'h3000_0004) begin
+			// Send output of seqmult product
+			// $display("WK  %08x: %08x", latched_raddr, wkmem[(latched_raddr-'h4000_0000) >> 2]);
 			mem_axi_rdata <= p;
 			mem_axi_rvalid <= 1;
 			latched_raddr_en = 0; // Why?
-		end else begin
+		end
+		else begin
 			$display("OUT-OF-BOUNDS MEMORY READ FROM %08x", latched_raddr);
 			$finish;
 		end
@@ -118,7 +125,7 @@ module axi4_mem_periph #(
 	task handle_axi_bvalid; begin
 		if (verbose)
 			$display("WR: ADDR=%08x DATA=%08x STRB=%04b", latched_waddr, latched_wdata, latched_wstrb);
-		if (latched_waddr < 128*1024) begin
+		if (latched_waddr < 2048*1024) begin
 			if (latched_wstrb[0]) memory[latched_waddr >> 2][ 7: 0] <= latched_wdata[ 7: 0];
 			if (latched_wstrb[1]) memory[latched_waddr >> 2][15: 8] <= latched_wdata[15: 8];
 			if (latched_wstrb[2]) memory[latched_waddr >> 2][23:16] <= latched_wdata[23:16];
@@ -147,18 +154,26 @@ module axi4_mem_periph #(
 			if (latched_wdata == 1)
 				tests_passed = 1;
 		end else 
-		if (latched_waddr == 32'h40C0_0000) begin // Add custom functionality
+		if (latched_waddr == 32'h3000_0000) begin // Add custom functionality
             reset <= latched_wdata;
 			$display("Write %3d to the reset signal", latched_wdata);
-		end else 
-		if (latched_waddr == 32'h4000_0000) begin // Add custom functionality
-            a <= latched_wdata;
-			$display("Write %3d to mult 'a' input", latched_wdata);
-		end else 
-		if (latched_waddr == 32'h4040_0000) begin // Add custom functionality
-			b <= latched_wdata;
-            $display("Write %3d to mult 'b' input", latched_wdata);
-		end else begin
+		end else
+		if ((latched_waddr >= 32'h4000_0000) && (latched_waddr < 32'h4200_0000)) begin
+			if (latched_wstrb[0]) wkmem[(latched_waddr-'h4000_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
+			if (latched_wstrb[1]) wkmem[(latched_waddr-'h4000_0000) >> 2][15: 8] <= latched_wdata[15: 8];
+			if (latched_wstrb[2]) wkmem[(latched_waddr-'h4000_0000) >> 2][23:16] <= latched_wdata[23:16];
+			if (latched_wstrb[3]) wkmem[(latched_waddr-'h4000_0000) >> 2][31:24] <= latched_wdata[31:24];
+			
+			if (latched_waddr == 32'h4000_0000) begin // Add custom functionality
+				a <= latched_wdata;
+				$display("Write %3d to mult 'a' input", latched_wdata);
+			end else 
+			if (latched_waddr == 32'h4040_0000) begin // Add custom functionality
+				b <= latched_wdata;
+				$display("Write %3d to mult 'b' input", latched_wdata);
+			end 
+		end
+		else begin
 			$display("OUT-OF-BOUNDS MEMORY WRITE TO %08x", latched_waddr);
 			$finish;
 		end

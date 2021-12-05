@@ -8,9 +8,10 @@ means.
 */
 
 MEMORY {
-	/* the memory in the testbench is 128k in size;
-	 * set LENGTH=96k and leave at least 32k for stack */
-	mem : ORIGIN = 0x00000000, LENGTH = 0x00018000
+	/* Original was 128k total, LENGTH=0x00018000 - 96k
+	 * the memory in the testbench is 2M in size;
+	 * set LENGTH=2M-32k and leave at least 32k for stack */
+	mem : ORIGIN = 0x00000000, LENGTH = 0x001F8000
 }
 
 SECTIONS {
