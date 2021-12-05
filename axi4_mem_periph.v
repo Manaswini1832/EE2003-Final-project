@@ -159,10 +159,10 @@ module axi4_mem_periph #(
 			$display("Write %3d to the reset signal", latched_wdata);
 		end else
 		if ((latched_waddr >= 32'h4000_0000) && (latched_waddr < 32'h4200_0000)) begin
-			if (latched_wstrb[0]) wkmem[(latched_waddr-'h4000_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
-			if (latched_wstrb[1]) wkmem[(latched_waddr-'h4000_0000) >> 2][15: 8] <= latched_wdata[15: 8];
-			if (latched_wstrb[2]) wkmem[(latched_waddr-'h4000_0000) >> 2][23:16] <= latched_wdata[23:16];
-			if (latched_wstrb[3]) wkmem[(latched_waddr-'h4000_0000) >> 2][31:24] <= latched_wdata[31:24];
+			if (latched_wstrb[0]) memory[(latched_waddr-'h4000_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
+			if (latched_wstrb[1]) memory[(latched_waddr-'h4000_0000) >> 2][15: 8] <= latched_wdata[15: 8];
+			if (latched_wstrb[2]) memory[(latched_waddr-'h4000_0000) >> 2][23:16] <= latched_wdata[23:16];
+			if (latched_wstrb[3]) memory[(latched_waddr-'h4000_0000) >> 2][31:24] <= latched_wdata[31:24];
 			
 			if (latched_waddr == 32'h4000_0000) begin // Add custom functionality
 				a <= latched_wdata;
