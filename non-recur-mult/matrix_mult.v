@@ -20,7 +20,7 @@ module matrix_mult
 
 reg signed [bitwidth-1:0] matA [order-1:0][order-1:0];
 reg signed [bitwidth-1:0] matB [order-1:0][order-1:0];
-reg signed [bitwidth-1:0] matC [order-1:0][order-1:0];
+reg signed [2*bitwidth-1:0] matC [order-1:0][order-1:0];
 integer i,j,k;                            // loop indices
 reg first_cycle;                          // indicates its the first clock cycle after enable went High.
 reg end_of_mult;                          // indicates multiplication has ended.
