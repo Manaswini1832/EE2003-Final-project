@@ -21,8 +21,8 @@ void send_stat(bool status)
 #define MULT_A 0x40000000
 #define MULT_B 0x40400000
 #define MULT_RES 0x40800000
-#define MULT_ENABLE 0x30000004
 #define MULT_RDY 0x30000000
+#define MULT_ENABLE 0x30000004
 #define START_SIG 0x01
 #define TIMEOUT 1000
 
@@ -30,7 +30,8 @@ void send_stat(bool status)
 void Mult_WriteA(int *A, int order);
 void Mult_WriteB(int *B, int order);
 void Mult_StartAndWait(void);
-int Mult_GetResult(void);
+void Mult_GetResult(int *C_hard, int order);
+int checkIfMatricesEqual(int *C_soft, int *C_hard, int order);
 
 // Set up the 'a' input to the multiplier
 // void Mult_WriteA(int x)
@@ -62,9 +63,10 @@ void Mult_WriteB(int *B, int order)
 // and then wait until the signal "rdy" comes back as 1
 void Mult_StartAndWait(void)
 {
-	volatile int *q = (int *)MULT_ENABLE;
-	volatile int *p = (int *)MULT_RDY;
+	volatile int *q = (int *)MULT_ENABLE; // corresponds to enable
+	volatile int *p = (int *)MULT_RDY; // corresponds to reset
 	// Assume the LSB bit of MULT_RDY is connected to the "reset" signal
+	*q = 0; // Enable is low initially
 	*p = START_SIG; // Reset goes high
 	*p = 0; // Reset goes low
 	*q = START_SIG; // Enable goes high
@@ -87,10 +89,26 @@ void Mult_StartAndWait(void)
 	*q = 0;
 }
 
-int Mult_GetResult(void)
+void Mult_GetResult(int *C_hard, int order)
 {
-	volatile int *p = (int *)MULT_RES;
-	return (*p);
+	int i, j;
+    for (i = 0; i < order; i++){
+      for (j = 0; j < order; j++){
+		volatile int *p = (int *)(MULT_RES + 4*i);
+        *((C_hard+i*order) + j) = *(p);
+	}}
+}
+
+int checkIfMatricesEqual(int *C_soft, int *C_hard, int order)
+{
+	int i, j;
+    for (i = 0; i < order; i++){
+      for (j = 0; j < order; j++){
+        if(*((C_soft+i*order) + j) != *((C_hard+i*order) + j)){
+			return 0;
+		}
+	}}
+	return 1;
 }
 
 void hello(void)
@@ -127,14 +145,32 @@ void hello(void)
 	int order = 2;
 	int A[order][order]; 
 	int B[order][order];
+	int C_soft[order][order];
+	int C_hard[order][order];
     A[0][0] = 1; A[0][1] = 2; A[1][0] = 1; A[1][1] = 1;
 	B[0][0] = 2; B[0][1] = 2; B[1][0] = 2; B[1][1] = 2;
+	/////////////////////////////////HARDCODING C_SOFT FOR NOW/////////////////////////////////////////
+	C_soft[0][0] = 6; C_soft[0][1] = 6; C_soft[1][0] = 4; C_soft[1][1] = 4;
+	//////////////////////////////////////////////////////////////////////////////////////////////////
 	print_str("\nWriting A to memory========================\n");
 	Mult_WriteA((int *)A, order);
 	print_str("\nWriting B to memory========================\n");
 	Mult_WriteB((int *)B, order);
 	print_str("Waiting for multiplication result\n");
-	// Mult_StartAndWait();
+	Mult_StartAndWait();
+	Mult_GetResult((int *)C_hard, order);
+	//Checking if the result from hardware matches the one from software
+	// int equal = checkIfMatricesEqual((int *)C_soft, (int *)C_hard, order);
+	// send_stat(equal);
+	if((C_soft[0][0] == C_hard[0][0]) && (C_soft[0][1] == C_hard[0][1]) && (C_soft[1][0] == C_hard[1][0]) && (C_soft[1][1] == C_hard[1][1])){
+		print_str("Successful multiplication\n");
+	}else{
+		print_str("Error in multiplication\n");
+	}
+	print_dec(C_hard[0][0]);
+	print_dec(C_hard[0][1]);
+	print_dec(C_hard[1][0]);
+	print_dec(C_hard[1][1]);
 
 }
 

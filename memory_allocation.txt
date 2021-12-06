@@ -15,7 +15,8 @@ Range of C
 40BFFFFF == 1086324735
 
 => Total of 4194304 one-byte locations for A, B, C each
-(4194304/4)*3 = 31,45,728 four-byte locations
+(4194304/4)*3 = 31,45,728 four-byte locations for A,B,C together
+or 1048576 four-byte locations for A,B,C each
 
 order = 512 => no of 4-byte locations needed for A,B&C = 512*512*3 = 7,86,432
 order = 1024 => no of 4-byte locations needed for A,B&C = 1024*1024*3 = 31,45,728
@@ -28,6 +29,7 @@ Leftover range of addresses
 
 Constraints chosen
 - A, B's elements are 16bit but are stored as 32 bit numbers in memory
+- C's elements are 32 bit numbers
 - Can go till 1024x1024 order of matrices(only square matrices)
 - rdy comes from 0x30000000
 - enable of the matrix_mult module is at : 0x30000004

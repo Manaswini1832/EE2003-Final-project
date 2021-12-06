@@ -12,9 +12,9 @@ module matrix_mult_new
     (   input clk,
         input reset, //active high reset
         input enable,    //This should be High throughout the matrix multiplication process.
-        input [0:4194303] A ,
-        input [0:4194303] B ,
-        output reg [0:4194303] C ,
+        input [0:1048576*32-1] A ,
+        input [0:1048576*32-1] B,
+        output reg [0:1048576*32-1] C ,
         output reg rdy     //rdy high indicates that multiplication is done and result is availble at C.
     );   
 
