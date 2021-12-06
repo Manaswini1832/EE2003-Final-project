@@ -1,7 +1,7 @@
 //Testbench for testing the 4 by 4 matrix multiplier.
 module tb_matrix_mult
 #(
-parameter order = 4, bitwidth = 8
+parameter order = 2, bitwidth = 16
 );
 
 reg [order*order*bitwidth - 1:0] A;
@@ -30,8 +30,8 @@ begin
     //Answer should be 5D 96 7E 39 60 51 15 2A 24
 
     //4x4 matrix test case
-    A = {8'd9,8'd8,8'd7,8'd6,8'd5,8'd4,8'd3,8'd2,8'd1,8'd9,8'd8,8'd7,8'd6,8'd5,8'd4,8'd3};
-    B = {8'd1,8'd9,8'd8,8'd7,8'd6,8'd5,8'd4,8'd3,8'd2,8'd1,8'd9,8'd8,8'd7,8'd6,8'd5,8'd4};
+    // A = {8'd9,8'd8,8'd7,8'd6,8'd5,8'd4,8'd3,8'd2,8'd1,8'd9,8'd8,8'd7,8'd6,8'd5,8'd4,8'd3};
+    // B = {8'd1,8'd9,8'd8,8'd7,8'd6,8'd5,8'd4,8'd3,8'd2,8'd1,8'd9,8'd8,8'd7,8'd6,8'd5,8'd4};
     //Answer should be 71 A4 C5 A7 31 50 5D 4F 78 68 97 7E 41 65 77 65
 
     enable = 1;

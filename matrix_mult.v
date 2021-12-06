@@ -7,14 +7,14 @@
 
 module matrix_mult
     #(
-        parameter order = 2, bitwidth = 8 //Default parameter values
+        parameter order = 2, bitwidth = 16 //Default parameter values
     )
     (   input clk,
         input reset, //active high reset
         input enable,    //This should be High throughout the matrix multiplication process.
         input [order*order*bitwidth-1:0] A,
         input [order*order*bitwidth-1:0] B,
-        output reg [order*order*bitwidth-1:0] C,
+        output reg [2*order*order*bitwidth-1:0] C,
         output reg rdy     //rdy high indicates that multiplication is done and result is availble at C.
     );   
 

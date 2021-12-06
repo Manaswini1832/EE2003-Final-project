@@ -30,7 +30,7 @@ module axi4_mem_periph #(
 	output reg        tests_passed
 );
     
-    //Reg, wire declarations for inputs and outputs of seq_mult module
+    // Reg, wire declarations for inputs and outputs of seq_mult module
     wire [15:0] p;
     wire [15:0] rdy;
     reg reset;
@@ -38,12 +38,34 @@ module axi4_mem_periph #(
     
     // Instantiating the sequential multiplier module
     seq_mult seq_mult(p, rdy, clk, reset, a, b);
+
+
 	
 	//Memory register instantiations
 	reg [31:0]   memory [0:2048*1024/4-1] /* verilator public */;
 	// // Memory to store 2 matrices (1M) and working memory (2M)
 	// reg [31:0]   matrixmem [0:1024*1024/4-1] /* verilator public */;
-	reg [31:0]   wkmem  [0:2048*1024/4-1] /* verilator public */;
+	// reg [31:0] matAmem [0:2048*1024/4-1] /* verilator public */;
+	// reg [31:0] matBmem [0:2048*1024/4-1] /* verilator public */;
+	reg [31:0] matAmem [0:4194303] /* verilator public */;
+	reg [31:0] matBmem [0:4194303] /* verilator public */;
+	reg [31:0] matCmem [0:4194303] /* verilator public */;
+
+	//Reg, wire declarations for the inputs and outputs of the matrix_mult module
+    // reg reset; //active high reset
+    reg enable = 0;    //This should be High throughout the matrix multiplication process.
+    // wire [31:0] rdy;
+
+	// //Instantiating the matrix multiplier module
+	// matrix_mult #(.order(2), .bitwidth(32)) matrix_mult(
+	// 	.clk(clk), 
+    //     .reset(reset), 
+    //     .enable(enable), 
+    //     .A(matAmem),
+    //     .B(matBmem), 
+    //     .C(matCmem),
+    //     .rdy(rdy)
+	// )
 	
 	reg verbose;
 	initial verbose = $test$plusargs("verbose") || VERBOSE;
@@ -112,7 +134,7 @@ module axi4_mem_periph #(
 		if (latched_raddr == 32'h3000_0004) begin
 			// Send output of seqmult product
 			// $display("WK  %08x: %08x", latched_raddr, wkmem[(latched_raddr-'h4000_0000) >> 2]);
-			mem_axi_rdata <= p;
+			mem_axi_rdata <= matCmem[0];
 			mem_axi_rvalid <= 1;
 			latched_raddr_en = 0; // Why?
 		end
@@ -154,24 +176,36 @@ module axi4_mem_periph #(
 			if (latched_wdata == 1)
 				tests_passed = 1;
 		end else 
-		if (latched_waddr == 32'h3000_0000) begin // Add custom functionality
+		if (latched_waddr == 32'h3000_0000) begin // Checking for rdy signal
             reset <= latched_wdata;
 			$display("Write %3d to the reset signal", latched_wdata);
 		end else
-		if ((latched_waddr >= 32'h4000_0000) && (latched_waddr < 32'h4200_0000)) begin
-			if (latched_wstrb[0]) memory[(latched_waddr-'h4000_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
-			if (latched_wstrb[1]) memory[(latched_waddr-'h4000_0000) >> 2][15: 8] <= latched_wdata[15: 8];
-			if (latched_wstrb[2]) memory[(latched_waddr-'h4000_0000) >> 2][23:16] <= latched_wdata[23:16];
-			if (latched_wstrb[3]) memory[(latched_waddr-'h4000_0000) >> 2][31:24] <= latched_wdata[31:24];
-			
-			if (latched_waddr == 32'h4000_0000) begin // Add custom functionality
-				a <= latched_wdata;
-				$display("Write %3d to mult 'a' input", latched_wdata);
-			end else 
-			if (latched_waddr == 32'h4040_0000) begin // Add custom functionality
-				b <= latched_wdata;
-				$display("Write %3d to mult 'b' input", latched_wdata);
-			end 
+		if (latched_waddr == 32'h3000_0004) begin // Enabling or disabling the matrix multiplier
+            enable <= latched_wdata;
+			$display("Write %3d to the reset signal", latched_wdata);
+		end 
+		else
+		if ((latched_waddr >= 32'h4000_0000) && (latched_waddr <= 32'h403F_FFFF)) begin
+			$display("Writing A into correct memory locations");
+			if (latched_wstrb[0]) matAmem[(latched_waddr-'h4000_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
+			if (latched_wstrb[1]) matAmem[(latched_waddr-'h4000_0000) >> 2][15: 8] <= latched_wdata[15: 8];
+			if (latched_wstrb[2]) matAmem[(latched_waddr-'h4000_0000) >> 2][23:16] <= latched_wdata[23:16];
+			if (latched_wstrb[3]) matAmem[(latched_waddr-'h4000_0000) >> 2][31:24] <= latched_wdata[31:24];
+			// if (latched_waddr == 32'h4000_0000) begin // Add custom functionality
+			// 	a <= latched_wdata;
+			// 	$display("Write %3d to mult 'a' input", latched_wdata);
+			// end else 
+			// if (latched_waddr == 32'h4040_0000) begin // Add custom functionality
+			// 	b <= latched_wdata;
+			// 	$display("Write %3d to mult 'b' input", latched_wdata);
+			// end 
+		end else
+		if ((latched_waddr >= 32'h4040_0000) && (latched_waddr <= 32'h407F_FFFF)) begin
+			$display("Writing B into correct memory locations");
+			if (latched_wstrb[0]) matBmem[(latched_waddr-'h4040_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
+			if (latched_wstrb[1]) matBmem[(latched_waddr-'h4040_0000) >> 2][15: 8] <= latched_wdata[15: 8];
+			if (latched_wstrb[2]) matBmem[(latched_waddr-'h4040_0000) >> 2][23:16] <= latched_wdata[23:16];
+			if (latched_wstrb[3]) matBmem[(latched_waddr-'h4040_0000) >> 2][31:24] <= latched_wdata[31:24];
 		end
 		else begin
 			$display("OUT-OF-BOUNDS MEMORY WRITE TO %08x", latched_waddr);
