@@ -30,8 +30,8 @@ void send_stat(bool status)
 void Mult_WriteA(int *A, int order);
 void Mult_WriteB(int *B, int order);
 void Mult_StartAndWait(void);
-// void Mult_GetResult(int *C_hard, int order);
-void Mult_GetResult(void);
+void Mult_GetResult(int *C_hard, int order);
+// void Mult_GetResult(void);
 int checkIfMatricesEqual(int *C_soft, int *C_hard, int order);
 
 
@@ -91,13 +91,18 @@ void Mult_StartAndWait(void)
 	enable = 0;
 }
 
-// void Mult_GetResult(int *C_hard, int order)
-void Mult_GetResult()
+void Mult_GetResult(int *C_hard, int order)
+// void Mult_GetResult()
 {
-	//axi4_mem_periph.v sends back a 1048576 bit number and we need to unflatten it to get the correct result
-	volatile int *p = (int *)(MULT_RES);
-	print_str("Inside the mult get result function");
-	print_dec(*(p));
+	print_str("Reading multiplication result from memory\n");
+	int i, j;
+	int *p = (int *)MULT_RES;
+    for (i = 0; i < order; i++){
+      for (j = 0; j < order; j++){
+        *((C_hard+i*order) + j) = *(p);
+		p++;
+    }}
+	print_str("Finished reading C from memory :)\n");
 }
 
 int checkIfMatricesEqual(int *C_soft, int *C_hard, int order)
@@ -118,12 +123,12 @@ void hello(void)
 	int order = 2;
 	int A[order][order]; 
 	int B[order][order];
-	// int C_soft[order][order];
-	// int C_hard[order][order];
+	int C_soft[order][order];
+	int C_hard[order][order];
     A[0][0] = 1; A[0][1] = 2; A[1][0] = 1; A[1][1] = 1;
 	B[0][0] = 2; B[0][1] = 2; B[1][0] = 2; B[1][1] = 2;
 	/////////////////////////////////HARDCODING C_SOFT FOR NOW/////////////////////////////////////////
-	// C_soft[0][0] = 6; C_soft[0][1] = 6; C_soft[1][0] = 4; C_soft[1][1] = 4;
+	C_soft[0][0] = 6; C_soft[0][1] = 6; C_soft[1][0] = 4; C_soft[1][1] = 4;
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	print_str("\n");
 	print_str("Writing A to memory========================\n");
@@ -131,10 +136,9 @@ void hello(void)
 	print_str("Writing B to memory========================\n");
 	Mult_WriteB((int *)B, order);
 	Mult_StartAndWait();
-	// Mult_GetResult((int *)C_hard, order);
-	Mult_GetResult();
+	Mult_GetResult((int *)C_hard, order);
 	//Checking if the result from hardware matches the one from software
-	// int equal = checkIfMatricesEqual((int *)C_soft, (int *)C_hard, order);
-	// send_stat(equal);
+	int equal = checkIfMatricesEqual((int *)C_soft, (int *)C_hard, order);
+	send_stat(equal);
 }
 

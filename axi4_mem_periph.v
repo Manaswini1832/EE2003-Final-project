@@ -42,7 +42,9 @@ module axi4_mem_periph #(
     wire [15:0] rdy;
 	reg enable = 0;
 
+	integer unflatten_index = 0;
 	integer flatten_index = 0;	
+	integer order = 2;
 
 	//Instantiating the matrix multiplier module
 	matrix_mult_new #(.order(2), .bitwidth(32)) matrix_mult_new(
@@ -128,9 +130,10 @@ module axi4_mem_periph #(
 		else
 		if ((latched_raddr >= 32'h4080_0000) && (latched_raddr <= 32'h40BF_FFFF)) begin
 			//Send the apt element of C back(C has been calculated using the matrix_mult module)
-			$display("Reading the result of hardware matrix multiplication from memory");
-			mem_axi_rdata <= matCarg;
-			mem_axi_rvalid <= 1;
+			unflatten_index = (latched_raddr-'h4080_0000) >> 2;
+			mem_axi_rdata = matCarg[32*unflatten_index +: 32];
+			//  <= matCarg;
+			mem_axi_rvalid = 1;
 			latched_raddr_en = 0; // Why?
 		end
 		else begin
