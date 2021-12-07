@@ -46,8 +46,8 @@ begin
             end 
         end 
     end
-    else begin  //for the positve edge of Clock.
-        if(enable == 1)     //Any action happens only when enable is High.
+    else   //for the positve edge of Clock.
+        if(enable == 1)    begin //Any action happens only when enable is High.
             if(first_cycle == 1) begin     //the very first cycle after enable is high.
                 //the matrices which are in a 1-D array are converted to 2-D matrices first.
                 for(i=0; i<=order-1; i=i+1) begin

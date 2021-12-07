@@ -85,7 +85,7 @@ testbench_synth.vvp: testbench.v synth.v
 	$(IVERILOG) -o $@ -DSYNTH_TEST $^
 	chmod -x $@
 
-testbench_verilator: testbench_mod.v picorv32.v axi4_mem_periph.v testbench.cc
+testbench_verilator: testbench_mod.v picorv32.v axi4_mem_periph.v testbench.cc matrix_mult_new.v
 	$(VERILATOR) --cc --exe -Wno-lint -trace --top-module picorv32_wrapper testbench_mod.v picorv32.v axi4_mem_periph.v testbench.cc \
 			$(subst C,-DCOMPRESSED_ISA,$(COMPRESSED_ISA)) --Mdir testbench_verilator_dir
 	$(MAKE) -C testbench_verilator_dir -f Vpicorv32_wrapper.mk
