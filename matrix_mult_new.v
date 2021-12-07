@@ -164,7 +164,9 @@ begin
                         i = 0;
                         j = 0;
                         k = 0;
-            end else begin
+        end
+        end
+        else begin
                 //If it is not the first cycle after enable, do this
                 if(end_of_mult == 0) begin     //multiplication hasnt ended. Keep multiplying.
                     $display("Doing actual multiplication\n");
@@ -189,12 +191,28 @@ begin
                     else
                         k = k+1;
                 end
-            end 
-        end
-        else begin
-                // not the first cycle and end_of_mult = 1
-                rdy <= 1;
-        end
+        else if(end_of_mult && !rdy) begin     
+                //End of multiplication has reached
+                //convert n by n matrix into a 1-D matrix.
+                //All the first 'order' number of elements of matCmem are filled with the multiplication result
+                //Other elements are zero anyways since we initialized all elements to zero at the beginning of axi4_mem_periph.v
+                for(i=0; i<=order-1; i=i+1) begin   //run through the rows
+                $display("Last second step of multiplication\n");
+                    for(j=0; j<=order-1; j=j+1) begin    //run through the columns
+                        // matCmem[(i*order+j)*bitwidth+:bitwidth] = matC[i][j];
+                        matCmem[(i*order+j)] = matC[i][j];
+                    end
+                end   
+                // Flatten the 1D array matCmem into a 1048576 bit number matCarg which is the output of this module
+                //NEED TO UNCOMMENT FOLLOWING LINE LATER    
+				// for (flatten_index = 0; flatten_index < 1048576; flatten_index = flatten_index+1) begin
+                $display("Starting to flatten out multiplication result :)\n");
+                for (flatten_index = 0; flatten_index < 4; flatten_index = flatten_index+1) begin
+					matCarg[32*flatten_index +: 32] = matCmem[flatten_index];
+				end
+                rdy = 1;   //Set this output High, to say that C has the final result.
+    end
+end
     end
 end
  
