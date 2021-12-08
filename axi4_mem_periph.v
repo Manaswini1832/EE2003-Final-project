@@ -37,7 +37,7 @@ module axi4_mem_periph #(
 
 	//Reg, wire declarations for the inputs and outputs of the matrix_mult module
     reg reset = 0;
-    wire [15:0] rdy;
+	wire rdy;
 	reg enable = 0;
 
 	integer unflatten_index = 0;
