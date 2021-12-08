@@ -51,8 +51,7 @@ begin
             end 
         end 
     end
-    else begin
-        if(enable && !end_of_mult)begin
+    else if(enable == 1) begin
             if(first_cycle) begin
                 // Flattened numbers matAarg and matBarg are unflattened into matAmem and matBmem
                 //NEED TO UNCOMMENT FOLLOWING LINE LATER    
@@ -63,7 +62,7 @@ begin
                 end
 
                 //Unflattened 1-D arrays matAmem and matBmem are converted to 2-D matrices
-                $display("Starting to create 2d matrices\n");
+                // $display("Starting to create 2d matrices\n");
                 for(i=0; i<=order-1; i=i+1) begin
                     for(j=0; j<=order-1; j=j+1) begin
                         matA[i][j] = matAmem[(i*order+j)];
@@ -71,7 +70,7 @@ begin
                         matC[i][j] = {bitwidth{1'd0}};
                     end 
                 end
-                $display("Done creating 2D matrices");
+                // $display("Done creating 2D matrices");
                 // re-initalize registers before the start of multiplication.
                         first_cycle = 0;
                         end_of_mult = 0;
@@ -79,12 +78,9 @@ begin
                         i = 0;
                         j = 0;
                         k = 0;
-        end
-        end
-        else begin
-                //If it is not the first cycle after enable, do this
-                if(end_of_mult == 0) begin     //multiplication hasnt ended. Keep multiplying.
-                    $display("Doing actual multiplication\n");
+            end
+            else if(end_of_mult == 0) begin     //multiplication hasnt ended. Keep multiplying.
+                    // $display("Doing actual multiplication\n");
                     //Actual matrix multiplication starts from now on.
                     temp = matA[i][k]*matB[k][j];
                     matC[i][j] = matC[i][j] + temp[bitwidth-1:0];    //Lower half of the product is accumulatively added to form the result.
@@ -95,7 +91,7 @@ begin
                             if (i == order-1) begin
                                 i = 0;
                                 end_of_mult = 1;
-                                $display("End of mult is made 1");
+                                // $display("End of mult is made 1");
                             end
                             else
                                 i = i + 1;
@@ -105,29 +101,28 @@ begin
                     end
                     else
                         k = k+1;
-                end
-        else if(end_of_mult && !rdy) begin     
-                //End of multiplication has reached
-                //convert n by n matrix into a 1-D matrix.
-                //All the first 'order' number of elements of matCmem are filled with the multiplication result
-                //Other elements are zero anyways since we initialized all elements to zero at the beginning of axi4_mem_periph.v
-                for(i=0; i<=order-1; i=i+1) begin   //run through the rows
-                $display("Last second step of multiplication\n");
-                    for(j=0; j<=order-1; j=j+1) begin    //run through the columns
-                        // matCmem[(i*order+j)*bitwidth+:bitwidth] = matC[i][j];
-                        matCmem[(i*order+j)] = matC[i][j];
-                    end
-                end   
-                // Flatten the 1D array matCmem into a 1048576 bit number matCarg which is the output of this module
-                //NEED TO UNCOMMENT FOLLOWING LINE LATER    
-				// for (flatten_index = 0; flatten_index < 1048576; flatten_index = flatten_index+1) begin
-                $display("Starting to flatten out multiplication result :)\n");
-                for (flatten_index = 0; flatten_index < 4; flatten_index = flatten_index+1) begin
-					matCarg[32*flatten_index +: 32] = matCmem[flatten_index];
-				end
-                rdy = 1;   //Set this output High, to say that C has the final result.
-    end
-end
+            end
+            else if(end_of_mult && !rdy) begin     
+                        //End of multiplication has reached
+                        //convert n by n matrix into a 1-D matrix.
+                        //All the first 'order' number of elements of matCmem are filled with the multiplication result
+                        //Other elements are zero anyways since we initialized all elements to zero at the beginning of axi4_mem_periph.v
+                        for(i=0; i<=order-1; i=i+1) begin   //run through the rows
+                        // $display("Last second step of multiplication\n");
+                            for(j=0; j<=order-1; j=j+1) begin    //run through the columns
+                                // matCmem[(i*order+j)*bitwidth+:bitwidth] = matC[i][j];
+                                matCmem[(i*order+j)] = matC[i][j];
+                            end
+                        end   
+                        // Flatten the 1D array matCmem into a 1048576 bit number matCarg which is the output of this module
+                        //NEED TO UNCOMMENT FOLLOWING LINE LATER    
+                        // for (flatten_index = 0; flatten_index < 1048576; flatten_index = flatten_index+1) begin
+                        // $display("Starting to flatten out multiplication result :)\n");
+                        for (flatten_index = 0; flatten_index < 4; flatten_index = flatten_index+1) begin
+                            matCarg[32*flatten_index +: 32] = matCmem[flatten_index];
+                        end
+                        rdy = 1;   //Set this output High, to say that C has the final result.
+            end
     end
 end
  

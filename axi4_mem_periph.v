@@ -184,26 +184,22 @@ module axi4_mem_periph #(
 		end 
 		else
 		if ((latched_waddr >= 32'h4000_0000) && (latched_waddr <= 32'h403F_FFFF)) begin
-			$display("Writing A into memory");
-			// //At this point, matAmem is just extra stuff!!
+			// $display("Writing A into memory");
 			// if (latched_wstrb[0]) matAmem[(latched_waddr-'h4000_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
 			// if (latched_wstrb[1]) matAmem[(latched_waddr-'h4000_0000) >> 2][15: 8] <= latched_wdata[15: 8];
 			// if (latched_wstrb[2]) matAmem[(latched_waddr-'h4000_0000) >> 2][23:16] <= latched_wdata[23:16];
 			// if (latched_wstrb[3]) matAmem[(latched_waddr-'h4000_0000) >> 2][31:24] <= latched_wdata[31:24];	
-			// //At this point, matAmem is just extra stuff!!
 
 			//Flattening out latched_wdata so that matrix_mult receives correct input
 			flatten_index = (latched_waddr-'h4000_0000) >> 2;
 			matAarg[32*flatten_index +: 32] = latched_wdata;	
 		end else
 		if ((latched_waddr >= 32'h4040_0000) && (latched_waddr <= 32'h407F_FFFF)) begin
-			$display("Writing B into memory");
-			// //At this point, matBmem is just extra stuff!!
+			// $display("Writing B into memory");
 			// if (latched_wstrb[0]) matBmem[(latched_waddr-'h4040_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
 			// if (latched_wstrb[1]) matBmem[(latched_waddr-'h4040_0000) >> 2][15: 8] <= latched_wdata[15: 8];
 			// if (latched_wstrb[2]) matBmem[(latched_waddr-'h4040_0000) >> 2][23:16] <= latched_wdata[23:16];
 			// if (latched_wstrb[3]) matBmem[(latched_waddr-'h4040_0000) >> 2][31:24] <= latched_wdata[31:24];
-			// //At this point, matBmem is just extra stuff!!
 
 			//Flattening out latched_wdata so that matrix_mult receives correct input
 			flatten_index = (latched_waddr-'h4040_0000) >> 2;
