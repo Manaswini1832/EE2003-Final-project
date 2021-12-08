@@ -24,19 +24,17 @@ void send_stat(bool status)
 #define MULT_RDY 0x30000000
 #define MULT_ENABLE 0x30000004
 #define START_SIG 0x01
-#define TIMEOUT 10000
+#define TIMEOUT 1000
 
 // Function prototypes
 void Mult_WriteA(int *A, int order);
 void Mult_WriteB(int *B, int order);
 void Mult_StartAndWait(void);
 void Mult_GetResult(int *C_hard, int order);
-// void Mult_GetResult(void);
 int checkIfMatricesEqual(int *C_soft, int *C_hard, int order);
 
 
 void Mult_WriteA(int *A, int order){
-	// print_str("Inside the mult write A function\n");
 	int i, j;
 	int *p = (int *)MULT_A;
     for (i = 0; i < order; i++){
@@ -49,7 +47,6 @@ void Mult_WriteA(int *A, int order){
 
 void Mult_WriteB(int *B, int order)
 {
-	// print_str("Inside the mult write B function\n");
 	int i, j;
 	int *p = (int *)MULT_B;
     for (i = 0; i < order; i++){
@@ -63,7 +60,7 @@ void Mult_WriteB(int *B, int order)
 // and then wait until the signal "rdy" comes back as 1
 void Mult_StartAndWait(void)
 {
-	// print_str("Inside the Multstart,wait function\n");
+	print_str("Waiting for the result...\n");
 	volatile int *p = (int *)MULT_RDY; // corresponds to reset
 	volatile int *q = (int *)MULT_ENABLE; 
 	// Assume the LSB bit of MULT_RDY is connected to the "reset" signal
@@ -75,15 +72,10 @@ void Mult_StartAndWait(void)
 	// after multiplication is complete.
 	bool rdy = false;
 	int count = 0;
-	// bool enable = true;
 	bool enable = 1;
 	while (!rdy && (count < TIMEOUT) && enable) {
 		volatile int x = (*p); // read from MULT_RDY
-		// volatile int y = (*q); // read from MULT_ENABLE
-		// volatile int y = (*q);
 		if (((x & 0x01) == 1)) {
-			// *q = 0;
-			// enable = 0;
 			rdy = true;
 		}
 		count ++;
@@ -99,7 +91,7 @@ void Mult_StartAndWait(void)
 void Mult_GetResult(int *C_hard, int order)
 // void Mult_GetResult()
 {
-	// print_str("Reading multiplication result from memory\n");
+	print_str("Reading multiplication result from memory\n");
 	int i, j;
 	int *p = (int *)MULT_RES;
     for (i = 0; i < order; i++){
@@ -124,7 +116,6 @@ int checkIfMatricesEqual(int *C_soft, int *C_hard, int order)
 
 void hello(void)
 {
-	// print_str("Started executing hello.c");
 	int order = 2;
 	int A[order][order]; 
 	int B[order][order];
@@ -136,9 +127,9 @@ void hello(void)
 	C_soft[0][0] = 6; C_soft[0][1] = 6; C_soft[1][0] = 4; C_soft[1][1] = 4;
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	print_str("\n");
-	// print_str("Writing A to memory========================\n");
+	print_str("Writing A to memory========================\n");
 	Mult_WriteA((int *)A, order);
-	// print_str("Writing B to memory========================\n");
+	print_str("Writing B to memory========================\n");
 	Mult_WriteB((int *)B, order);
 	Mult_StartAndWait();
 	Mult_GetResult((int *)C_hard, order);

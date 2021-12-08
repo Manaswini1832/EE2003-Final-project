@@ -3,7 +3,7 @@
 
 //n by n matrix multiplier. Each element of the matrix is "bitwidth" bits wide. 
 //Inputs are named A and B and output is named as C. 
-//Each matrix has n^2 elements each of which are "bitwidth" bits wide each. So the inputs are n^2*bitwidth=128 bits long.
+//Each matrix has n^2 elements each of which are "bitwidth" bits wide each
 
 module matrix_mult_new
     #(
@@ -11,30 +11,30 @@ module matrix_mult_new
     )
     (   input clk,
         input reset, //active high reset
-        input enable,    //This should be High throughout the matrix multiplication process.
-        input [0:1048576*32-1] matAarg, // Number that contains A's elements as bits. Input this to matrix_mult module
-        input [0:1048576*32-1] matBarg, // Number that contains B's elements as bits. Input this to matrix_mult module
-        output reg [0:1048576*32-1] matCarg,
-        output reg rdy     //rdy high indicates that multiplication is done and result is availble at C.
-    );   
+        input enable, //should be asserted throughout the multiplication process
+        input [0:1048576*32-1] matAarg, // Number that contains A's elements as bits
+        input [0:1048576*32-1] matBarg, // Number that contains B's elements as bits
+        output reg [0:1048576*32-1] matCarg,// Number that contains C's elements as bits
+        output reg rdy//rdy high indicates that multiplication is done and result is availble at C.
+);   
+
 reg [31:0] matAmem [0:1048575]; // 1D Array into which A's elements are written.
 reg [31:0] matBmem [0:1048575]; // 1D Array into which B's elements are written.
 reg [31:0] matCmem [0:1048575]; // 1D Array into which 2D matC's elements are written.
-reg signed [bitwidth-1:0] matA [order-1:0][order-1:0];
-reg signed [bitwidth-1:0] matB [order-1:0][order-1:0];
-reg signed [bitwidth-1:0] matC [order-1:0][order-1:0];
-integer i,j,k;                            // loop indices
-reg first_cycle;                          // indicates its the first clock cycle after enable went High.
-reg end_of_mult;                          // indicates multiplication has ended.
-reg signed [2*bitwidth-1:0] temp;                   // register to hold the product of two elements.
+reg signed [bitwidth-1:0] matA [order-1:0][order-1:0]; // 2D Array into which A's elements are written.
+reg signed [bitwidth-1:0] matB [order-1:0][order-1:0]; // 2D Array into which B's elements are written.
+reg signed [bitwidth-1:0] matC [order-1:0][order-1:0]; // 2D Array into which C's elements are written.
+integer i,j,k;
+reg first_cycle; // indicates the first clock cycle after enable goes high
+reg end_of_mult; // indicates end of multiplication
+reg signed [2*bitwidth-1:0] temp; // register to temporarily hold the product of two elements.
 integer flatten_index;
 integer unflatten_index;
 
 //Matrix multiplication.
 always @(posedge clk or posedge reset)    
 begin
-    if(reset) begin    //Active high reset
-        // $display("Resetting inside matrix_mult");
+    if(reset) begin
         i <= 0;
         j <= 0;
         k <= 0;
@@ -54,9 +54,7 @@ begin
     else if(enable == 1) begin
             if(first_cycle) begin
                 // Flattened numbers matAarg and matBarg are unflattened into matAmem and matBmem
-                //NEED TO UNCOMMENT FOLLOWING LINE LATER    
-                // for (unflatten_index = 0; unflatten_index < 1048576; unflatten_index = unflatten_index+1) begin
-                for (unflatten_index = 0; unflatten_index < 4; unflatten_index = unflatten_index+1) begin
+                for (unflatten_index = 0; unflatten_index < order*order; unflatten_index = unflatten_index+1) begin
                     matAmem[unflatten_index] = matAarg[32*unflatten_index +: 32];
                     matBmem[unflatten_index] = matBarg[32*unflatten_index +: 32];
                 end
@@ -79,7 +77,7 @@ begin
                         j = 0;
                         k = 0;
             end
-            else if(end_of_mult == 0) begin     //multiplication hasnt ended. Keep multiplying.
+            else if(end_of_mult == 0) begin
                     // $display("Doing actual multiplication\n");
                     //Actual matrix multiplication starts from now on.
                     temp = matA[i][k]*matB[k][j];
@@ -115,10 +113,8 @@ begin
                             end
                         end   
                         // Flatten the 1D array matCmem into a 1048576 bit number matCarg which is the output of this module
-                        //NEED TO UNCOMMENT FOLLOWING LINE LATER    
-                        // for (flatten_index = 0; flatten_index < 1048576; flatten_index = flatten_index+1) begin
                         // $display("Starting to flatten out multiplication result :)\n");
-                        for (flatten_index = 0; flatten_index < 4; flatten_index = flatten_index+1) begin
+                        for (flatten_index = 0; flatten_index < order*order; flatten_index = flatten_index+1) begin
                             matCarg[32*flatten_index +: 32] = matCmem[flatten_index];
                         end
                         rdy = 1;   //Set this output High, to say that C has the final result.

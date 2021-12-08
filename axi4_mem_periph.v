@@ -31,8 +31,6 @@ module axi4_mem_periph #(
 );	
 	//Memory register instantiations
 	reg [31:0] memory [0:2048*1024/4-1];
-	// reg [31:0] matAmem [0:1048575]; // Array into which A's elements are written from hello.c
-	// reg [31:0] matBmem [0:1048575]; // Array into which B's elements are written from hello.c
 	reg [0:1048576*32-1] matAarg; // Number that contains A's elements as bits. Input this to matrix_mult module
 	reg [0:1048576*32-1] matBarg; // Number that contains B's elements as bits. Input this to matrix_mult module
 	wire [0:1048576*32-1] matCarg; // Number that should store C's elements as bits. This is the output from matrix_mult module
@@ -132,7 +130,6 @@ module axi4_mem_periph #(
 			//Send the apt element of C back(C has been calculated using the matrix_mult module)
 			unflatten_index = (latched_raddr-'h4080_0000) >> 2;
 			mem_axi_rdata = matCarg[32*unflatten_index +: 32];
-			//  <= matCarg;
 			mem_axi_rvalid = 1;
 			latched_raddr_en = 0; // Why?
 		end
@@ -184,23 +181,11 @@ module axi4_mem_periph #(
 		end 
 		else
 		if ((latched_waddr >= 32'h4000_0000) && (latched_waddr <= 32'h403F_FFFF)) begin
-			// $display("Writing A into memory");
-			// if (latched_wstrb[0]) matAmem[(latched_waddr-'h4000_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
-			// if (latched_wstrb[1]) matAmem[(latched_waddr-'h4000_0000) >> 2][15: 8] <= latched_wdata[15: 8];
-			// if (latched_wstrb[2]) matAmem[(latched_waddr-'h4000_0000) >> 2][23:16] <= latched_wdata[23:16];
-			// if (latched_wstrb[3]) matAmem[(latched_waddr-'h4000_0000) >> 2][31:24] <= latched_wdata[31:24];	
-
 			//Flattening out latched_wdata so that matrix_mult receives correct input
 			flatten_index = (latched_waddr-'h4000_0000) >> 2;
 			matAarg[32*flatten_index +: 32] = latched_wdata;	
 		end else
 		if ((latched_waddr >= 32'h4040_0000) && (latched_waddr <= 32'h407F_FFFF)) begin
-			// $display("Writing B into memory");
-			// if (latched_wstrb[0]) matBmem[(latched_waddr-'h4040_0000) >> 2][ 7: 0] <= latched_wdata[ 7: 0];
-			// if (latched_wstrb[1]) matBmem[(latched_waddr-'h4040_0000) >> 2][15: 8] <= latched_wdata[15: 8];
-			// if (latched_wstrb[2]) matBmem[(latched_waddr-'h4040_0000) >> 2][23:16] <= latched_wdata[23:16];
-			// if (latched_wstrb[3]) matBmem[(latched_waddr-'h4040_0000) >> 2][31:24] <= latched_wdata[31:24];
-
 			//Flattening out latched_wdata so that matrix_mult receives correct input
 			flatten_index = (latched_waddr-'h4040_0000) >> 2;
 			matBarg[32*flatten_index +: 32] = latched_wdata;	
