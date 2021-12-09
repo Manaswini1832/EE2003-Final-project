@@ -35,6 +35,7 @@ void Mult_WriteB(int *B, int order);
 void Mult_StartAndWait(void);
 void Mult_GetResult(int *C_hard, int order);
 int checkIfMatricesEqual(int *C_soft, int *C_hard, int order);
+int get_time(void);
 
 void Mult_WriteOrder(int order){
     volatile int *p = (int *)MULT_ORDER;
@@ -119,14 +120,22 @@ int checkIfMatricesEqual(int *C_soft, int *C_hard, int order)
 	}}
 	return 1;
 }
+int get_time(void)
+{
+	unsigned int time;
+	__asm__ volatile ("rdtime %0;" : "=r"(time));
+	return time;
+}
 
 void hello(void)
 {
+	int start1 = get_time();
 	static const int A[matrix_order][matrix_order] = {{1, 2}, {1, 1}, {1, 2}, {1, 1}}; 
 	static const int B[matrix_order][matrix_order] = {{2, 2}, {2, 2}, {1, 2}, {1, 1}};
 	int C_soft[matrix_order][matrix_order];
 	int C_hard[matrix_order][matrix_order];
 	
+	int start2 = get_time();
 	for (int i = 0; i < matrix_order; i++) {
        	 for (int j = 0; j < matrix_order; j++) {
             		C_soft[i][j] = 0;
@@ -135,7 +144,11 @@ void hello(void)
             			}
         	}
     	}
-	
+	int end = get_time();
+	print_dec(end - start1);
+	print_str("\n");
+	print_dec(end - start2);
+
 	print_str("\n");
     print_str("Writing order to memory========================\n");
     Mult_WriteOrder(matrix_order);
