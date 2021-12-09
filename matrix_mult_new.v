@@ -12,6 +12,7 @@ module matrix_mult_new
     (   input clk,
         input reset, //active high reset
         input enable, //should be asserted throughout the multiplication process
+        input [9:0] order_memory,
         input [0:1048576*32-1] matAarg, // Number that contains A's elements as bits
         input [0:1048576*32-1] matBarg, // Number that contains B's elements as bits
         output reg [0:1048576*32-1] matCarg,// Number that contains C's elements as bits
@@ -53,6 +54,8 @@ begin
     end
     else if(enable == 1) begin
             if(first_cycle) begin
+            $display("This is the order from memory:%d", order_memory);
+           
                 // Flattened numbers matAarg and matBarg are unflattened into matAmem and matBmem
                 for (unflatten_index = 0; unflatten_index < order*order; unflatten_index = unflatten_index+1) begin
                     matAmem[unflatten_index] = matAarg[32*unflatten_index +: 32];

@@ -50,6 +50,7 @@ module axi4_mem_periph #(
 		.clk(clk), 
         .reset(reset),  
 		.enable(enable),
+		.order_memory(order),
         .matAarg(matAarg),
         .matBarg(matBarg), 
         .matCarg(matCarg),
@@ -82,7 +83,9 @@ module axi4_mem_periph #(
 	reg [31:0] latched_wdata;
 	reg [ 3:0] latched_wstrb;
 	reg        latched_rinsn;
-
+	//always @(order) begin
+	//	$display("Order changed to %d ", order);
+	//end
 	task handle_axi_arvalid; begin
 		mem_axi_arready <= 1;
 		latched_raddr = mem_axi_araddr;
