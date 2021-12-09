@@ -26,6 +26,7 @@ void send_stat(bool status)
 #define START_SIG 0x01
 #define TIMEOUT 1000
 #define MULT_ORDER 0x30000008
+#define matrix_order 4
 
 // Function prototypes
 void Mult_WriteOrder(int order);
@@ -121,35 +122,30 @@ int checkIfMatricesEqual(int *C_soft, int *C_hard, int order)
 
 void hello(void)
 {
-	int order = 2;
-	int A[order][order]; 
-	int B[order][order];
-	int C_soft[order][order];
-	int C_hard[order][order];
-        A[0][0] = 1; A[0][1] = 2; A[1][0] = 1; A[1][1] = 1;
-	B[0][0] = 2; B[0][1] = 2; B[1][0] = 2; B[1][1] = 2;
+	static const int A[matrix_order][matrix_order] = {{1, 2}, {1, 1}, {1, 2}, {1, 1}}; 
+	static const int B[matrix_order][matrix_order] = {{2, 2}, {2, 2}, {1, 2}, {1, 1}};
+	int C_soft[matrix_order][matrix_order];
+	int C_hard[matrix_order][matrix_order];
 	
-	for (int i = 0; i < order; i++) {
-       	 for (int j = 0; j < order; j++) {
+	for (int i = 0; i < matrix_order; i++) {
+       	 for (int j = 0; j < matrix_order; j++) {
             		C_soft[i][j] = 0;
-           		 for (int k = 0; k < order; k++){
+           		 for (int k = 0; k < matrix_order; k++){
                		 C_soft[i][j] += A[i][k] * B[k][j];
             			}
         	}
     	}
-    
 	
 	print_str("\n");
     print_str("Writing order to memory========================\n");
-    Mult_WriteOrder(order);
+    Mult_WriteOrder(matrix_order);
 	print_str("Writing A to memory========================\n");
-	Mult_WriteA((int *)A, order);
+	Mult_WriteA((int *)A, matrix_order);
 	print_str("Writing B to memory========================\n");
-	Mult_WriteB((int *)B, order);
+	Mult_WriteB((int *)B, matrix_order);
 	Mult_StartAndWait();
-	Mult_GetResult((int *)C_hard, order);
+	Mult_GetResult((int *)C_hard, matrix_order);
 	//Checking if the result from hardware matches the one from software
-	int equal = checkIfMatricesEqual((int *)C_soft, (int *)C_hard, order);
+	int equal = checkIfMatricesEqual((int *)C_soft, (int *)C_hard, matrix_order);
 	send_stat(equal);
 }
-

@@ -43,10 +43,9 @@ module axi4_mem_periph #(
 
 	integer unflatten_index = 0;
 	integer flatten_index = 0;	
-// 	integer order = 2;
 
 	//Instantiating the matrix multiplier module
-	matrix_mult_new #(.order(2), .bitwidth(32)) matrix_mult_new(
+	matrix_mult_new matrix_mult_new(
 		.clk(clk), 
         .reset(reset),  
 		.enable(enable),
@@ -83,9 +82,7 @@ module axi4_mem_periph #(
 	reg [31:0] latched_wdata;
 	reg [ 3:0] latched_wstrb;
 	reg        latched_rinsn;
-	//always @(order) begin
-	//	$display("Order changed to %d ", order);
-	//end
+
 	task handle_axi_arvalid; begin
 		mem_axi_arready <= 1;
 		latched_raddr = mem_axi_araddr;
