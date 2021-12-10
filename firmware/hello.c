@@ -98,7 +98,7 @@ void Mult_StartAndWait(void)
 void Mult_GetResult(int *C_hard, int order)
 // void Mult_GetResult()
 {
-	print_str("Reading multiplication result from memory\n");
+	print_str("Reading multiplication result from memory ... \n");
 	int i, j;
 	int *p = (int *)MULT_RES;
     for (i = 0; i < order; i++){
@@ -106,7 +106,7 @@ void Mult_GetResult(int *C_hard, int order)
         *((C_hard+i*order) + j) = *(p);
 		p++;
     }}
-	print_str("Finished reading C from memory :)\n");
+	print_str("Finished reading the result\n");
 }
 
 int checkIfMatricesEqual(int *C_soft, int *C_hard, int order)
@@ -120,7 +120,9 @@ int checkIfMatricesEqual(int *C_soft, int *C_hard, int order)
 	}}
 	return 1;
 }
+
 int get_time(void)
+
 {
 	unsigned int time;
 	__asm__ volatile ("rdtime %0;" : "=r"(time));
@@ -129,12 +131,14 @@ int get_time(void)
 
 void hello(void)
 {
-	int start1 = get_time();
+	//Start2 is the timestamp before starting the execution of multiplication C-code
+    int start1 = get_time();
 	static const int A[matrix_order][matrix_order] = {{1, 2}, {1, 1}, {1, 2}, {1, 1}}; 
 	static const int B[matrix_order][matrix_order] = {{2, 2}, {2, 2}, {1, 2}, {1, 1}};
 	int C_soft[matrix_order][matrix_order];
 	int C_hard[matrix_order][matrix_order];
-	
+
+	//Start2 is the timestamp before starting the execution of multiplication C-code
 	int start2 = get_time();
 	for (int i = 0; i < matrix_order; i++) {
        	 for (int j = 0; j < matrix_order; j++) {
@@ -144,17 +148,22 @@ void hello(void)
             			}
         	}
     	}
-	int end = get_time();
-	print_dec(end - start1);
-	print_str("\n");
-	print_dec(end - start2);
+		int end = get_time();
 
 	print_str("\n");
-    print_str("Writing order to memory========================\n");
+	print_str("Multiplication in software------------------------------------\n");
+	print_str("Time taken by software, starting from the beginning : ");
+	print_dec(end - start1);
+	print_str("\n");
+	print_str("Time taken by software starting from the for loop : ");
+	print_dec(end - start2);
+	print_str("\n");
+	print_str("Multiplication in hardware------------------------------------\n");
+    print_str("Writing order to memory ... \n");
     Mult_WriteOrder(matrix_order);
-	print_str("Writing A to memory========================\n");
+	print_str("Writing A to memory ... \n");
 	Mult_WriteA((int *)A, matrix_order);
-	print_str("Writing B to memory========================\n");
+	print_str("Writing B to memory ... \n");
 	Mult_WriteB((int *)B, matrix_order);
 	Mult_StartAndWait();
 	Mult_GetResult((int *)C_hard, matrix_order);
