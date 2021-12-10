@@ -38,7 +38,7 @@ module axi4_mem_periph #(
 	//Reg, wire declarations for the inputs and outputs of the matrix_mult module
     reg reset = 0;
 	wire rdy;
-    reg [9:0]order = 0;
+    reg [9:0] order = 0;
 	reg enable = 0;
 
 	integer unflatten_index = 0;
@@ -58,7 +58,6 @@ module axi4_mem_periph #(
 	
 	reg verbose;
 	initial verbose = $test$plusargs("verbose") || VERBOSE;
-	// initial verbose = 1;
 
 	initial begin
 		mem_axi_awready = 0;
@@ -118,13 +117,13 @@ module axi4_mem_periph #(
 			// Return the multiplier status - bit 0 should reflect the rdy signal
 			mem_axi_rdata <= rdy;
 			mem_axi_rvalid <= 1;
-			latched_raddr_en = 0; // Why?
+			latched_raddr_en = 0;
 		end else
 		if (latched_raddr == 32'h3000_0004) begin
 			// Send enable signal of the matrix_mult module back
 			mem_axi_rdata <= enable;
 			mem_axi_rvalid <= 1;
-			latched_raddr_en = 0; // Why?
+			latched_raddr_en = 0;
 		end 
 		else
 		if ((latched_raddr >= 32'h4080_0000) && (latched_raddr <= 32'h40BF_FFFF)) begin
@@ -132,14 +131,14 @@ module axi4_mem_periph #(
 			unflatten_index = (latched_raddr-'h4080_0000) >> 2;
 			mem_axi_rdata = matCarg[32*unflatten_index +: 32];
 			mem_axi_rvalid = 1;
-			latched_raddr_en = 0; // Why?
+			latched_raddr_en = 0;
 		end
         else
             if (latched_raddr == 32'h3000_0008) begin
                 $display("Reading order:");
 			mem_axi_rdata <= order;
 			mem_axi_rvalid = 1;
-			latched_raddr_en = 0; // Why?
+			latched_raddr_en = 0;
 		end
 		else begin
 			$display("OUT-OF-BOUNDS MEMORY READ FROM %08x", latched_raddr);

@@ -27,14 +27,12 @@ static void stats_print_dec(unsigned int val, int digits, bool zero_pad)
 
 void stats(void)
 {
-	unsigned int num_cycles, num_instr, time;
-	__asm__ volatile ("rdcycle %0; rdinstret %1; rdtime %2;" : "=r"(num_cycles), "=r"(num_instr), "=r"(time));
+	unsigned int num_cycles, num_instr;
+	__asm__ volatile ("rdcycle %0; rdinstret %1;" : "=r"(num_cycles), "=r"(num_instr));
 	print_str("Cycle counter ........");
 	stats_print_dec(num_cycles, 8, false);
 	print_str("\nInstruction counter ..");
 	stats_print_dec(num_instr, 8, false);
-	print_str("\nProgram execution time ..");
-	stats_print_dec(time, 8, false);
 	print_str("\nCPI: ");
 	stats_print_dec((num_cycles / num_instr), 0, false);
 	print_str(".");

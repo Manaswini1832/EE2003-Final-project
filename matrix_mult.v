@@ -5,6 +5,8 @@
 //Inputs are named A and B and output is named as C. 
 //Each matrix has n^2 elements each of which are "bitwidth" bits wide each
 
+`timescale 1 ns / 1 ps
+
 module matrix_mult_new
     #(
         parameter 
@@ -46,7 +48,6 @@ begin
         first_cycle = 1;
         end_of_mult <= 0;
         rdy <= 0;
-        //Initialize all the matrix register elements to zero.
         for(i=0; i<=order_memory-1; i=i+1) begin
             for(j=0; j<=order_memory-1; j=j+1) begin
                 matA[i][j] <= {bitwidth{1'd0}};
@@ -56,8 +57,8 @@ begin
         end 
     end
     else if(enable == 1) begin
+            $display($realtime);
             if(first_cycle) begin 
-                // $display(order_memory*order_memory);
                 // Flattened numbers matAarg and matBarg are unflattened into matAmem and matBmem
                 for (unflatten_index = 0; unflatten_index < order_memory*order_memory; unflatten_index = unflatten_index+1) begin
                     matAmem[unflatten_index] = matAarg[32*unflatten_index +: 32];
@@ -123,8 +124,10 @@ begin
                             matCarg[32*flatten_index +: 32] = matCmem[flatten_index];
                         end
                         rdy = 1;   //Set this output High, to say that C has the final result.
+            $display($realtime);
             end
     end
+    
 end
  
 endmodule
