@@ -57,7 +57,8 @@ begin
         end 
     end
     else if(enable == 1) begin
-            $display($realtime);
+            //Uncomment the following line to get execution time
+            // $display($realtime);
             if(first_cycle) begin 
                 // Flattened numbers matAarg and matBarg are unflattened into matAmem and matBmem
                 for (unflatten_index = 0; unflatten_index < order_memory*order_memory; unflatten_index = unflatten_index+1) begin
@@ -124,7 +125,9 @@ begin
                             matCarg[32*flatten_index +: 32] = matCmem[flatten_index];
                         end
                         rdy = 1;   //Set this output High, to say that C has the final result.
-            $display($realtime);
+
+            //Uncomment the following line to get execution time
+            // $display($realtime);
             end
     end
     

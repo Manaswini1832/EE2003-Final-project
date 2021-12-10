@@ -1,18 +1,19 @@
+# EE2003 Project - Acceleration of matrix multiplication using a memory mapped peripheral
 
-# Assignment 5 - Interfacing
+## Project Goals
+Our project was focused on implementing the multiplication of two square matrices using the
+non-recursive multiplication algorithm and trying to check if the use of a memory mapped
+peripheral accelerates the process or not.
 
-*Note*: This is a forked repository of PicoRV32 - the original README is available at [[README_picorv32.md]].
+## How the code baseline was setup for comparison
+The baseline was set up by referring to the nanojpeg project baseline. To calculate the time taken to
+multiply two square matrices using the matrix multiplier that was coded in Verilog,
+$display($time) statements were used. To calculate the time taken by the C-code, a function
+called get_time was defined. The two results obtained were then compared as shown in the
+subsequent sections.
 
-## Problem statement
-Interface the sequential multiplier you created in assignment 1 with the picorv32 processor.
+## How to run the code with different inputs
+- In the file ```firmware/hello.c``` change the parameter matrix_order to an order of choice and input the matrices A, B into the main ```hello``` function
+- Run the command ```make```
 
-## Given
-The file [[firmware/hello.c]] has been modified to add functions that will write inputs to the `a` and `b` inputs of the multiplier, and there is another function that will wait on the return values.  Read these functions as well as the file [[axi4_mem_periph.v]] carefully and understand how the interfacing of C code with the peripheral is done.
-
-You will now need to instantiate your seq_mult.v (add a line to the appropriate place in the Makefile so it compiles) and then create some new `reg` or `wire` signals in the `axi4_mem_periph` module to enable sending and receiving signals from the C code.
-
-## Test
-To run the test, you can just type `make` in the main folder.  This will compile the Verilog files for simulation with `iverilog`, and will also compile the C code to generate a *hex* file (instructions and data in hexadecimal format) that can be loaded into the CPU memory for execution.
-
-The C code will feed in 2 numbers, and test whether the output from your multiplier is correct.  Of course you can cheat and just return the product from your `Mult_GetResult` function, but for the final tests we will be running with separate test code, so changes you make in the C code will not be reflected there.  You could also just do the multiplication in Verilog and return the result.  Neither of these is going to teach you anything about computer design, so if you need to do this to get at least a partial result, please indicate this properly in your code so that we can consider it for partial marks.
-
+This should print out a ```All tests passed``` message if the result C calculated using the C-code is the same as the result obtained from the ```matrix_mult.v``` module which is the peripheral that we used to accelerate matrix multiplication
