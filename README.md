@@ -1,5 +1,7 @@
 # EE2003 Project - Acceleration of matrix multiplication using a memory mapped peripheral
 
+[YouTube video link](https://youtu.be/uRMUrRNdxxQ)
+
 ## Project Goals
 Our project was focused on implementing the multiplication of two square matrices using the
 non-recursive multiplication algorithm and trying to check if the use of a memory mapped
